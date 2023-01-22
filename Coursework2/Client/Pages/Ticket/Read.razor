@@ -1,0 +1,44 @@
+﻿@page "/ticket/details/{TicketId:guid}"
+
+@attribute [Authorize]
+@inject NavigationManager Navigation
+
+<button class="btn btn-primary" @onclick="BackToMenu">Back</button>
+
+<h3>Read Ticket Details</h3>
+
+<h4>Ticket Name</h4>
+<p>@ticket.TicketName</p>
+
+<h4>Deadline</h4>
+<p>@ticket.TicketEndDate</p>
+
+@code {
+    [Parameter]
+    public Guid TicketId { get; set; }
+    private Ticket ticket { get; set; } = new Ticket();
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            ticket = await Http.GetFromJsonAsync<Ticket>($"/api/Tickets/{TicketId}");
+
+        }
+        catch (AccessTokenNotAvailableException exception)
+        {
+            exception.Redirect();
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+        }
+
+
+    }
+
+    public void BackToMenu()
+    {
+        Navigation.NavigateTo("/ticket");
+    }
+}

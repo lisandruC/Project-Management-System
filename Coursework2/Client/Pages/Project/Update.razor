@@ -1,0 +1,72 @@
+﻿@page "/project/update/{ProjectId:guid}"
+
+@attribute [Authorize]
+@inject HttpClient Http
+@inject NavigationManager Navigation
+
+<button class="btn btn-primary" @onclick="BackToMenu">Back</button>
+
+<h3>Update Project</h3>
+<EditForm Model="Project" OnValidSubmit="@HandleValidSubmit">
+    <DataAnnotationsValidator />
+
+    <div class="form-group">
+        <label class="control-label">Name</label>
+        <InputText @bind-Value="Project.ProjectName" class="form-control"></InputText>
+        <ValidationMessage For="@(() => Project.ProjectName)" />
+    </div>
+
+    <div class="form-group">
+        <label class="control-label">Description</label>
+        <InputText @bind-Value="Project.ProjectDescription" class="form-control"></InputText>
+        <ValidationMessage For="@(() => Project.ProjectDescription)" />
+    </div>
+
+    <button type="submit" class="btn btn-primary">Submit</button>
+</EditForm>
+
+@code {
+    [Parameter]
+    public Guid ProjectId { get; set; }
+    private Project Project { get; set; } = new Project();
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            Project = await Http.GetFromJsonAsync<Project>($"/api/Projects/{ProjectId}");
+
+        }
+        catch (AccessTokenNotAvailableException exception)
+        {
+            exception.Redirect();
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+        }
+    }
+
+    private async void HandleValidSubmit()
+    {
+        try
+        {
+            var response = await Http.PutAsJsonAsync($"/api/Projects/{Project.ProjectId}", Project);
+            response.EnsureSuccessStatusCode();
+            Navigation.NavigateTo("/project");
+        }
+        catch (AccessTokenNotAvailableException exception)
+        {
+            exception.Redirect();
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+        }
+    }
+
+    public void BackToMenu()
+    {
+        Navigation.NavigateTo("/project");
+    }
+}

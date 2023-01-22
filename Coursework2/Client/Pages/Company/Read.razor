@@ -1,0 +1,44 @@
+﻿@page "/company/details/{CompanyId:guid}"
+
+@attribute [Authorize]
+@inject NavigationManager Navigation
+
+<button class="btn btn-primary" @onclick="BackToMenu">Back</button>
+
+<h3>Read Company Details</h3>
+
+<h4>Title</h4>
+<p>@company.Name</p>
+
+<h4>Description</h4>
+<p>@company.Description</p>
+
+@code {
+    [Parameter]
+    public Guid CompanyId { get; set; }
+    private Company company { get; set; } = new Company();
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            company = await Http.GetFromJsonAsync<Company>($"/api/Companies/{CompanyId}");
+
+        }
+        catch (AccessTokenNotAvailableException exception)
+        {
+            exception.Redirect();
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+        }
+
+
+    }
+
+    public void BackToMenu()
+    {
+        Navigation.NavigateTo("/company");
+    }
+}

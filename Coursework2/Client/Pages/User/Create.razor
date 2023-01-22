@@ -1,0 +1,71 @@
+﻿@page "/user/create"
+
+@attribute [Authorize]
+@inject HttpClient Http
+@inject NavigationManager Navigation
+
+<button class="btn btn-primary" @onclick="BackToMenu">Back</button>
+
+<h3>Create User</h3>
+<EditForm Model="User" OnValidSubmit="@HandleValidSubmit">
+    <DataAnnotationsValidator />
+
+    <div class="form-group">
+        <label class="control-label"> First Name</label>
+        <InputText @bind-Value="User.UserFirstName" class="form-control"></InputText>
+        <ValidationMessage For="@(() => User.UserFirstName)" />
+    </div>
+
+    <div class="form-group">
+        <label class="control-label">Last Name</label>
+        <InputText @bind-Value="User.UserLastName" class="form-control"></InputText>
+        <ValidationMessage For="@(() => User.UserLastName)" />
+    </div>
+
+    <div class="form-group">
+        <label class="control-label">User Email</label>
+        <InputText @bind-Value="User.UserEmail" class="form-control"></InputText>
+        <ValidationMessage For="@(() => User.UserEmail)" />
+    </div>
+
+    <div class="form-group">
+        <label class="control-label">User Mobile</label>
+        <InputText @bind-Value="User.UserMobile" class="form-control"></InputText>
+        <ValidationMessage For="@(() => User.UserMobile)" />
+    </div>
+
+    <button type="submit" class="btn btn-primary">Submit</button>
+    <button class="btn" style="background-color:orange" @onclick="BackToMenu">Cancel</button>
+
+</EditForm>
+
+@code {
+
+    private User User { get; set; } = new User();
+
+    private async void HandleValidSubmit()
+    {
+        try
+        {
+            var response = await Http.PostAsJsonAsync("/api/Users", User);
+            response.EnsureSuccessStatusCode();
+
+            var content = await response.Content.ReadAsStringAsync();
+            var user = JsonConvert.DeserializeObject<User>(content);
+        }
+        catch (AccessTokenNotAvailableException exception)
+        {
+            exception.Redirect();
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+        }
+        Navigation.NavigateTo("/user");
+    }
+
+    public void BackToMenu()
+    {
+        Navigation.NavigateTo("/user");
+    }
+}

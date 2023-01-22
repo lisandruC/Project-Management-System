@@ -1,0 +1,57 @@
+﻿@page "/ticket/create"
+
+@attribute [Authorize]
+@inject HttpClient Http
+@inject NavigationManager Navigation
+
+<h3>Create Ticket</h3>
+<EditForm Model="Ticket" OnValidSubmit="@HandleValidSubmit">
+    <DataAnnotationsValidator />
+
+    <div class="form-group">
+        <label class="control-label"> Ticket Name</label>
+        <InputText @bind-Value="Ticket.TicketName" class="form-control"></InputText>
+        <ValidationMessage For="@(() => Ticket.TicketName)" />
+    </div>
+
+    <div class="form-group">
+        <label class="control-label">Ticket Deadline</label>
+        <InputSelect @bind-Value="Ticket.TicketEndDate" class="form-control"></InputSelect>
+        <ValidationMessage For="@(() => Ticket.TicketEndDate)" />
+    </div>
+
+    <button type="submit" class="btn btn-primary">Submit</button>
+    <button class="btn" style="background-color:orange" @onclick="BackToMenu">Cancel</button>
+
+</EditForm>
+
+@code {
+
+    private Ticket Ticket { get; set; } = new Ticket();
+
+    private async void HandleValidSubmit()
+    {
+        try
+        {
+            var response = await Http.PostAsJsonAsync("/api/Tickets", Ticket);
+            response.EnsureSuccessStatusCode();
+
+            var content = await response.Content.ReadAsStringAsync();
+            var ticket = JsonConvert.DeserializeObject<Ticket>(content);
+        }
+        catch (AccessTokenNotAvailableException exception)
+        {
+            exception.Redirect();
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+        }
+        Navigation.NavigateTo("/ticket");
+    }
+
+    public void BackToMenu()
+    {
+        Navigation.NavigateTo("/ticket");
+    }
+}

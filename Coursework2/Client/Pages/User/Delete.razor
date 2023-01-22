@@ -1,0 +1,65 @@
+﻿@page "/user/delete/{UserId:guid}"
+
+@attribute [Authorize]
+@inject HttpClient Http
+@inject NavigationManager Navigation
+
+<button class="btn btn-primary" @onclick="BackToMenu">Back</button>
+
+<h3>Delete User</h3>
+
+<h4>First Name</h4>
+<p>@User.UserFirstName</p>
+
+<h4>Last Name</h4>
+<p>@User.UserLastName</p>
+
+<h4>Email</h4>
+<p>@User.UserEmail</p>
+
+<button class="btn btn-danger" @onclick="DeleteUser">Delete</button>
+
+@code {
+    [Parameter]
+    public Guid UserId { get; set; }
+    private User User { get; set; } = new User();
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            User = await Http.GetFromJsonAsync<User>($"/api/Users/{UserId}");
+        }
+        catch (AccessTokenNotAvailableException exception)
+        {
+            exception.Redirect();
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+        }
+    }
+
+    private async void DeleteUser()
+    {
+        try
+        {
+            var response = await Http.DeleteAsync($"/api/Projects/{User.UserId}");
+            response.EnsureSuccessStatusCode();
+            Navigation.NavigateTo("/user");
+        }
+        catch (AccessTokenNotAvailableException exception)
+        {
+            exception.Redirect();
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+        }
+    }
+
+    public void BackToMenu()
+    {
+        Navigation.NavigateTo("/user");
+    }
+}

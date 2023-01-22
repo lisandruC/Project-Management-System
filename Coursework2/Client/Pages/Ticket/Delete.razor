@@ -1,0 +1,62 @@
+﻿@page "/ticket/delete/{TicketId:guid}"
+
+@attribute [Authorize]
+@inject HttpClient Http
+@inject NavigationManager Navigation
+
+<button class="btn btn-primary" @onclick="BackToMenu">Back</button>
+
+<h3>Delete Ticket</h3>
+
+<h4>Title</h4>
+<p>@Ticket.TicketName</p>
+
+<h4>Deadline</h4>
+<p>@Ticket.TicketEndDate</p>
+
+<button class="btn btn-danger" @onclick="DeleteTicket">Delete</button>
+
+@code {
+    [Parameter]
+    public Guid TicketId { get; set; }
+    private Ticket Ticket { get; set; } = new Ticket();
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            Ticket = await Http.GetFromJsonAsync<Ticket>($"/api/Tickets/{TicketId}");
+        }
+        catch (AccessTokenNotAvailableException exception)
+        {
+            exception.Redirect();
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+        }
+    }
+
+    private async void DeleteTicket()
+    {
+        try
+        {
+            var response = await Http.DeleteAsync($"/api/Projects/{Ticket.TicketId}");
+            response.EnsureSuccessStatusCode();
+            Navigation.NavigateTo("/ticket");
+        }
+        catch (AccessTokenNotAvailableException exception)
+        {
+            exception.Redirect();
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+        }
+    }
+
+    public void BackToMenu()
+    {
+        Navigation.NavigateTo("/ticket");
+    }
+}

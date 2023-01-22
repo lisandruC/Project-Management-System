@@ -1,0 +1,72 @@
+﻿@page "/ticket/update/{TicketId:guid}"
+
+@attribute [Authorize]
+@inject HttpClient Http
+@inject NavigationManager Navigation
+
+<button class="btn btn-primary" @onclick="BackToMenu">Back</button>
+
+<h3>Update Ticket</h3>
+<EditForm Model="Ticket" OnValidSubmit="@HandleValidSubmit">
+    <DataAnnotationsValidator />
+
+    <div class="form-group">
+        <label class="control-label">Ticket Name</label>
+        <InputText @bind-Value="Ticket.TicketName" class="form-control"></InputText>
+        <ValidationMessage For="@(() => Ticket.TicketName)" />
+    </div>
+
+    <div class="form-group">
+        <label class="control-label">Ticket Status</label>
+        <InputCheckbox @bind-Value="Ticket.TicketStatus" class="form-control"></InputCheckbox>
+        <ValidationMessage For="@(() => Ticket.TicketStatus)" />
+    </div>
+
+    <button type="submit" class="btn btn-primary">Submit</button>
+</EditForm>
+
+@code {
+    [Parameter]
+    public Guid TicketId { get; set; }
+    private Ticket Ticket { get; set; } = new Ticket();
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            Ticket = await Http.GetFromJsonAsync<Ticket>($"/api/Tickets/{TicketId}");
+
+        }
+        catch (AccessTokenNotAvailableException exception)
+        {
+            exception.Redirect();
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+        }
+    }
+
+    private async void HandleValidSubmit()
+    {
+        try
+        {
+            var response = await Http.PutAsJsonAsync($"/api/Tickets/{Ticket.TicketId}", Ticket);
+            response.EnsureSuccessStatusCode();
+            Navigation.NavigateTo("/ticket");
+        }
+        catch (AccessTokenNotAvailableException exception)
+        {
+            exception.Redirect();
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+        }
+    }
+
+    public void BackToMenu()
+    {
+        Navigation.NavigateTo("/ticket");
+    }
+}

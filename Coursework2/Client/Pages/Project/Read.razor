@@ -1,0 +1,44 @@
+﻿@page "/project/details/{ProjectId:guid}"
+
+@attribute [Authorize]
+@inject NavigationManager Navigation
+
+<button class="btn btn-primary" @onclick="BackToMenu">Back</button>
+
+<h3>Read Project Details</h3>
+
+<h4>Title</h4>
+<p>@project.ProjectName</p>
+
+<h4>Description</h4>
+<p>@project.ProjectDescription</p>
+
+@code {
+    [Parameter]
+    public Guid ProjectId { get; set; }
+    private Project project { get; set; } = new Project();
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            project = await Http.GetFromJsonAsync<Project>($"/api/Projects/{ProjectId}");
+
+        }
+        catch (AccessTokenNotAvailableException exception)
+        {
+            exception.Redirect();
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+        }
+
+
+    }
+
+    public void BackToMenu()
+    {
+        Navigation.NavigateTo("/project");
+    }
+}

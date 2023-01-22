@@ -1,0 +1,74 @@
+﻿@page "/company/update/{CompanyId:guid}"
+
+@attribute [Authorize]
+@inject HttpClient Http 
+@inject NavigationManager Navigation
+
+<button class="btn btn-primary" @onclick="BackToMenu">Back</button>
+
+<h3>Update Company</h3>
+<EditForm Model="Company" OnValidSubmit="@HandleValidSubmit">
+    <DataAnnotationsValidator />
+
+    <div class="form-group">
+        <label class="control-label">Name</label>
+        <InputText @bind-Value="Company.Name" class="form-control"></InputText>
+        <ValidationMessage For="@(() => Company.Name)" />
+    </div>
+
+    <div class="form-group">
+        <label class="control-label">Description</label>
+        <InputText @bind-Value="Company.Description" class="form-control"></InputText>
+        <ValidationMessage For="@(() => Company.Description)" />
+    </div>
+
+   
+
+    <button type="submit" class="btn btn-primary">Submit</button>
+</EditForm>
+
+@code {
+    [Parameter]
+    public Guid CompanyId { get; set; }
+    private Company Company { get; set; } = new Company();
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            Company = await Http.GetFromJsonAsync<Company>($"/api/Companies/{CompanyId}");
+
+        }
+        catch (AccessTokenNotAvailableException exception)
+        {
+            exception.Redirect();
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+        }
+    }
+
+    private  async void HandleValidSubmit()
+    {
+        try
+        {
+            var response = await Http.PutAsJsonAsync($"/api/Companies/{Company.CompanyId}", Company);
+            response.EnsureSuccessStatusCode();
+            Navigation.NavigateTo("/company");
+        }
+        catch (AccessTokenNotAvailableException exception)
+        {
+            exception.Redirect();
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+        }
+    }
+
+    public void BackToMenu()
+    {
+        Navigation.NavigateTo("/company");
+    }
+}

@@ -1,0 +1,62 @@
+﻿@page "/project/delete/{ProjectId:guid}"
+
+@attribute [Authorize]
+@inject HttpClient Http
+@inject NavigationManager Navigation
+
+<button class="btn btn-primary" @onclick="BackToMenu">Back</button>
+
+<h3>Delete Project</h3>
+
+<h4>Title</h4>
+<p>@Project.ProjectName</p>
+
+<h4>Description</h4>
+<p>@Project.ProjectDescription</p>
+
+<button class="btn btn-danger" @onclick="DeleteProject">Delete</button>
+
+@code {
+    [Parameter]
+    public Guid ProjectId { get; set; }
+    private Project Project { get; set; } = new Project();
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            Project = await Http.GetFromJsonAsync<Project>($"/api/Projects/{ProjectId}");
+        }
+        catch (AccessTokenNotAvailableException exception)
+        {
+            exception.Redirect();
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+        }
+    }
+
+    private async void DeleteProject()
+    {
+        try
+        {
+            var response = await Http.DeleteAsync($"/api/Projects/{Project.ProjectId}");
+            response.EnsureSuccessStatusCode();
+            Navigation.NavigateTo("/project");
+        }
+        catch (AccessTokenNotAvailableException exception)
+        {
+            exception.Redirect();
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+        }
+    }
+
+    public void BackToMenu()
+    {
+        Navigation.NavigateTo("/project");
+    }
+}

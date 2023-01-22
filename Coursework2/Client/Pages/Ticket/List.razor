@@ -1,0 +1,59 @@
+﻿@page "/ticket"
+
+
+<h3>Ticket List</h3>
+
+<div class="table-responsive">
+    <table class="table table-hover">
+        <thead class="thead-dark">
+            <tr>
+                <th>Name</th>
+                <th>Read</th>
+                <th>Edit</th>
+                <th>Delete</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var ticket in Ticket)
+            {
+                <tr>
+                    <td>
+                        @ticket.TicketName
+                    </td>
+                    <td>
+                        <a href="/ticket/details/@ticket.TicketId">Details</a>
+                    </td>
+                    <td>
+                        <a href="/ticket/update/@ticket.TicketId">Update</a>
+                    </td>
+                    <td>
+                        <a href="/ticket/delete/@ticket.TicketId">Delete</a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+<p>
+    <a class="btn btn-primary" href="/ticket/create">Create</a>
+</p>
+
+@code {
+    private List<Ticket> Ticket = new List<Ticket>();
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            Ticket = await Http.GetFromJsonAsync<List<Ticket>>("/api/Tickets");
+        }
+        catch (AccessTokenNotAvailableException exception)
+        {
+            exception.Redirect();
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+        }
+    }
+}

@@ -1,0 +1,59 @@
+﻿@page "/company"
+
+
+<h3>Company List</h3>
+
+<div class="table-responsive">
+    <table class="table table-hover">
+        <thead class="thead-dark">
+            <tr>
+                <th>Name</th>
+                <th>Read</th>
+                <th>Edit</th>
+                <th>Delete</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var company in Company)
+            {
+                <tr>
+                    <td>
+                        @company.Name
+                    </td>
+                    <td>
+                        <a href="/company/details/@company.CompanyId">Details</a>
+                    </td>
+                    <td>
+                        <a href="/company/update/@company.CompanyId">Update</a>
+                    </td>
+                    <td>
+                        <a href="/company/delete/@company.CompanyId">Delete</a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+<p>
+    <a class="btn btn-primary" href="/company/create">Create</a>
+</p>
+
+@code {
+    private List<Company> Company = new List<Company>();
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            Company = await Http.GetFromJsonAsync<List<Company>>("/api/Companies");
+        }
+        catch (AccessTokenNotAvailableException exception)
+        {
+            exception.Redirect();
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+        }
+    }
+}

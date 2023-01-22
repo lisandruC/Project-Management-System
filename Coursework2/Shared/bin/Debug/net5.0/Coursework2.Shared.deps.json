@@ -1,0 +1,23 @@
+{
+  "runtimeTarget": {
+    "name": ".NETCoreApp,Version=v5.0",
+    "signature": ""
+  },
+  "compilationOptions": {},
+  "targets": {
+    ".NETCoreApp,Version=v5.0": {
+      "Coursework2.Shared/1.0.0": {
+        "runtime": {
+          "Coursework2.Shared.dll": {}
+        }
+      }
+    }
+  },
+  "libraries": {
+    "Coursework2.Shared/1.0.0": {
+      "type": "project",
+      "serviceable": false,
+      "sha512": ""
+    }
+  }
+}
